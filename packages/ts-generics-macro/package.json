@@ -1,0 +1,27 @@
+{
+  "name": "ts-generics-macro",
+  "version": "0.1.0",
+  "description": "Macros with type generics for TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "prettier": "prettier src --check",
+    "prettier:fix": "prettier src --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://hirano_ds@bitbucket.org/octava/ts-generics-macro.git"
+  },
+  "author": "hyranno",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://bitbucket.org/octava/ts-generics-macro/issues"
+  },
+  "homepage": "https://bitbucket.org/octava/ts-generics-macro#readme",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2"
+  }
+}
