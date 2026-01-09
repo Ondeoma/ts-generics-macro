@@ -17,6 +17,7 @@ export interface ContextBag {
 }
 
 
+export type MacroMap = Map<ts.Symbol, MacroDefinition>;
 
 export function isMacroIdent(name: ts.MemberName, options: Options): boolean {
   return name.text.endsWith(options.macroSuffix);

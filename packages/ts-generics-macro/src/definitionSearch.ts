@@ -2,20 +2,20 @@ import ts from 'typescript';
 import os from "node:os";
 
 import { createDiagnosticForMacroDef, DiagnosticMessage } from './diagnosticMessages';
-import { ContextBag, isMacroDefinition, MacroDefinition, Options } from './common';
+import { ContextBag, isMacroDefinition, MacroDefinition, MacroMap, Options } from './common';
 
 
-function createMacroDefinitionSearchVisitor(context: ContextBag, result: Map<ts.Symbol, MacroDefinition>): (node: ts.Node) => ts.Node {
-  const visitor = (node: ts.Node): ts.Node => {
+function createMacroDefinitionSearchVisitor(context: ContextBag, result: MacroMap): ts.Visitor {
+  const visitor: ts.Visitor = (node: ts.Node) => {
     if (isMacroDefinition(node, context.options)) {
       const symbol = node.name && context.checker.getSymbolAtLocation(node.name);
       if (!symbol) {
         const diag: ts.DiagnosticWithLocation = createDiagnosticForMacroDef(node, DiagnosticMessage.MacroDefWithNoNameSymbol);
         context.diagnostics.push(diag);
       } else {
-        result.set(symbol, node)
+        result.set(symbol, node);
       }
-      return node
+      return undefined;
     }
 
     else {
@@ -27,7 +27,7 @@ function createMacroDefinitionSearchVisitor(context: ContextBag, result: Map<ts.
 
 export interface MacroSearchOptions {
   globalOptions: Options,
-  macroMap: Map<ts.Symbol, MacroDefinition>,
+  macroMap: MacroMap,
 }
 
 export function macroDefinitionSearchTransformer(program: ts.Program, options: MacroSearchOptions): ts.Program {
@@ -49,7 +49,7 @@ export function macroDefinitionSearchTransformer(program: ts.Program, options: M
       transformer: transformationContext,
     } satisfies ContextBag;
     const visitor = createMacroDefinitionSearchVisitor(context, options.macroMap);
-    return ts.visitNode(sourceFile, visitor, ts.isSourceFile);
+    return ts.visitNode(sourceFile, visitor, ts.isSourceFile) ?? ts.factory.updateSourceFile(sourceFile, []);
   }) satisfies ts.TransformerFactory<ts.SourceFile>;
 
   const result = ts.transform(
