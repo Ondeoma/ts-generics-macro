@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npm run build -w ts-generics-macro",
     "test": "npm run test -w ts-generics-macro",
+    "test:watch": "npm run test:watch -w ts-generics-macro",
     "eslint": "eslint",
     "eslint:fix": "eslint --fix",
     "prettier": "npm run prettier --workspaces",
