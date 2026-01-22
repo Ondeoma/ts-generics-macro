@@ -1,7 +1,7 @@
 import ts from "typescript";
 
 type IEnforceMembersImplement<T, I> = {
-    [K in keyof T]: T[K] extends I ? T[K] : never;
+  [K in keyof T]: T[K] extends I ? T[K] : never;
 };
 
 export function enforceMembersImplement<I>() {
@@ -15,6 +15,11 @@ interface PrimitiveRef<T extends Primitive> {
   value: T;
 }
 
-export function getRootSymbol(symbol: ts.Symbol, checker: ts.TypeChecker,): ts.Symbol {
-  return (symbol.flags & ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
+export function getRootSymbol(
+  symbol: ts.Symbol,
+  checker: ts.TypeChecker,
+): ts.Symbol {
+  return symbol.flags & ts.SymbolFlags.Alias
+    ? checker.getAliasedSymbol(symbol)
+    : symbol;
 }

@@ -1,39 +1,51 @@
-import ts from 'typescript'
-import { enforceMembersImplement } from './utils';
+import ts from "typescript";
+import { enforceMembersImplement } from "./utils";
 
 interface IDiagnosticMessage {
-  category: ts.DiagnosticCategory,
-  messageText: string,
-  code: number,
+  category: ts.DiagnosticCategory;
+  messageText: string;
+  code: number;
 }
-
 
 /*
   This function is from typescript internal.
 */
 export function getSourceFileOfNode(node: ts.Node): ts.SourceFile;
-export function getSourceFileOfNode(node: ts.Node | undefined): ts.SourceFile | undefined;
-export function getSourceFileOfNode(node: ts.Node | undefined): ts.SourceFile | undefined {
+export function getSourceFileOfNode(
+  node: ts.Node | undefined,
+): ts.SourceFile | undefined;
+export function getSourceFileOfNode(
+  node: ts.Node | undefined,
+): ts.SourceFile | undefined {
   while (node && node.kind !== ts.SyntaxKind.SourceFile) {
     node = node.parent;
   }
   return node as ts.SourceFile;
 }
 
-export function createDiagnostic(node: ts.Node, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+export function createDiagnostic(
+  node: ts.Node,
+  message: IDiagnosticMessage,
+): ts.DiagnosticWithLocation {
   return {
     file: getSourceFileOfNode(node),
     start: node.pos,
     length: node.end - node.pos,
     ...message,
-  }
+  };
 }
 
-export function createDiagnosticForMacroDef(node: ts.FunctionDeclaration, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+export function createDiagnosticForMacroDef(
+  node: ts.FunctionDeclaration,
+  message: IDiagnosticMessage,
+): ts.DiagnosticWithLocation {
   return createDiagnostic(node, message);
 }
 
-export function createDiagnosticForMacroCall(node: ts.CallExpression, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+export function createDiagnosticForMacroCall(
+  node: ts.CallExpression,
+  message: IDiagnosticMessage,
+): ts.DiagnosticWithLocation {
   return createDiagnostic(node, message);
 }
 
@@ -65,7 +77,8 @@ export const DiagnosticMessage = {
   },
   MacroTypeParamWithNoSymbol: {
     category: ts.DiagnosticCategory.Error,
-    messageText: "Symbol for the type parameter of the macro definition must be available at call.",
+    messageText:
+      "Symbol for the type parameter of the macro definition must be available at call.",
     code: 24004,
   },
 } satisfies Record<string, IDiagnosticMessage>;
