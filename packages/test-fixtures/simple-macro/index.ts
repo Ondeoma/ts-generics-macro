@@ -21,3 +21,8 @@ function add$macro$(
 ): number {
   return a + b;
 }
+
+
+// using macro.
+console.log(true$macro$());
+console.log(add$macro$(1, 2));

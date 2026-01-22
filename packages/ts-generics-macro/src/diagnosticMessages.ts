@@ -20,13 +20,21 @@ export function getSourceFileOfNode(node: ts.Node | undefined): ts.SourceFile | 
   return node as ts.SourceFile;
 }
 
-export function createDiagnosticForMacroDef(node: ts.FunctionDeclaration, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+export function createDiagnostic(node: ts.Node, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
   return {
     file: getSourceFileOfNode(node),
     start: node.pos,
     length: node.end - node.pos,
     ...message,
   }
+}
+
+export function createDiagnosticForMacroDef(node: ts.FunctionDeclaration, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+  return createDiagnostic(node, message);
+}
+
+export function createDiagnosticForMacroCall(node: ts.CallExpression, message: IDiagnosticMessage): ts.DiagnosticWithLocation {
+  return createDiagnostic(node, message);
 }
 
 export const DiagnosticMessage = {
@@ -49,5 +57,15 @@ export const DiagnosticMessage = {
     messageText: "Cannot define macros in a generic function definition.",
     code: 24002,
   },
-};
-enforceMembersImplement<IDiagnosticMessage>()(DiagnosticMessage);
+
+  MacroCallTypeArgsMismatch: {
+    category: ts.DiagnosticCategory.Error,
+    messageText: "Type arguments did not match with definition.",
+    code: 24003,
+  },
+  MacroTypeParamWithNoSymbol: {
+    category: ts.DiagnosticCategory.Error,
+    messageText: "Symbol for the type parameter of the macro definition must be available at call.",
+    code: 24004,
+  },
+} satisfies Record<string, IDiagnosticMessage>;

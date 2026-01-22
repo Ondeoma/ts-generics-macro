@@ -2,6 +2,7 @@ import ts from "typescript";
 import path from "node:path";
 import os from "node:os";
 
+import type { TransformerExtras } from "ts-patch";
 
 export function loadConfig(projectRoot: string): ts.ParsedCommandLine {
   const configPath = path.join(projectRoot, "tsconfig.json");
@@ -60,11 +61,8 @@ export function getSortedSources(
         !file.isDeclarationFile &&
         path.resolve(file.fileName).includes(targetPath),
     )
-    .toSorted((a: ts.SourceFile, b: ts.SourceFile): number => {
-      const aName = path.relative(targetPath, a.fileName);
-      const bName = path.relative(targetPath, b.fileName);
-      return aName === bName ? 0 : aName < bName ? -1 : +1;
-    });
+    .toSorted((a: ts.SourceFile, b: ts.SourceFile): number => a.fileName === b.fileName ? 0 : a.fileName < b.fileName ? -1 : +1
+  );
 }
 
 export function printDiagnostics (diagnostics: ts.Diagnostic[]) {
@@ -78,4 +76,15 @@ export function printDiagnostics (diagnostics: ts.Diagnostic[]) {
       ts.formatDiagnosticsWithColorAndContext(diagnostics, formatDiagnosticHost)
     );
   }
+}
+
+export function createMockExtra(): TransformerExtras {
+  const diagnostics: ts.Diagnostic[] = [];
+  return {
+    ts,
+    library: "",
+    addDiagnostic: (diag: ts.Diagnostic) => diagnostics.push(diag),
+    removeDiagnostic: (index: number) => diagnostics.splice(index, 1),
+    diagnostics,
+  };
 }
