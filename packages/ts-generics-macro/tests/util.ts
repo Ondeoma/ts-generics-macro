@@ -1,5 +1,6 @@
 import ts from "typescript";
-import path from "path";
+import path from "node:path";
+import os from "node:os";
 
 
 export function loadConfig(projectRoot: string): ts.ParsedCommandLine {
@@ -64,4 +65,17 @@ export function getSortedSources(
       const bName = path.relative(targetPath, b.fileName);
       return aName === bName ? 0 : aName < bName ? -1 : +1;
     });
+}
+
+export function printDiagnostics (diagnostics: ts.Diagnostic[]) {
+  const formatDiagnosticHost = {
+    getCanonicalFileName: (fileName: string) => fileName,
+    getCurrentDirectory: ts.sys.getCurrentDirectory,
+    getNewLine: () => os.EOL,
+  };
+  if (0 < diagnostics.length) {
+    console.error(
+      ts.formatDiagnosticsWithColorAndContext(diagnostics, formatDiagnosticHost)
+    );
+  }
 }

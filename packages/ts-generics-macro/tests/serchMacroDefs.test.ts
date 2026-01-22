@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { describe, expect, test } from "vitest";
 import { createProgramForDirectory } from './util';
+import type { TransformerExtras } from "ts-patch";
 
 import { macroDefinitionSearchTransformer, MacroSearchOptions } from '../src/definitionSearch';
 import { MacroDefinition } from '../src/common';
@@ -18,7 +19,23 @@ describe("Macro defs searching", () => {
       },
       macroMap,
     }
-    macroDefinitionSearchTransformer(program, searchOptions);
+    const diagnostics: ts.Diagnostic[] = []
+    const extra: TransformerExtras = {
+      ts,
+      library: "",
+      addDiagnostic: (diag: ts.Diagnostic) => diagnostics.push(diag),
+      removeDiagnostic: (index: number) => diagnostics.splice(index, 1),
+      diagnostics,
+    };
+    const factory = macroDefinitionSearchTransformer(program, searchOptions, extra);
+
+    const transformationResult = ts.transform(
+      program
+        .getSourceFiles()
+        .filter(file => !file.isDeclarationFile),
+      [factory],
+      program.getCompilerOptions(),
+    )
 
     const actual = Array.from(
         macroMap.keys(),

@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import type { TransformerExtras } from "ts-patch";
 
 export interface Options {
   macroSuffix: string;
@@ -7,13 +8,13 @@ export interface Options {
 
 export interface ContextBag {
   options: Options;
-  diagnostics: ts.Diagnostic[];
-
+  
   program: ts.Program;
   compilerOptions: ts.CompilerOptions;
   checker: ts.TypeChecker;
   printer: ts.Printer;
   transformer: ts.TransformationContext;
+  extra: TransformerExtras;
 }
 
 
