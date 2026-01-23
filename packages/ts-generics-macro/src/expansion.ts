@@ -58,13 +58,17 @@ function extractTypeMap(
   context: ContextBag,
   macroCall: MacroCallExpression,
 ): Map<ts.Symbol, ts.TypeNode> | undefined {
+  const signature = context.checker.getResolvedSignature(macroCall.callExpression);
+  if (!signature) {
+    return undefined;
+  }
   const typeParams = macroCall.macroDefinition.typeParameters;
-  const typeArgs = macroCall.callExpression.typeArguments;
-  if (!typeParams && !typeArgs) {
+  const typeArgs = context.checker.getTypeArgumentsForResolvedSignature(signature);
+
+  if (!typeParams) {
     return undefined;
   }
   if (
-    typeParams === undefined ||
     typeArgs === undefined ||
     typeParams.length != typeArgs.length
   ) {
@@ -88,8 +92,20 @@ function extractTypeMap(
     return undefined;
   }
 
+  const typeArgNodes = typeArgs.map(targ => context.checker.typeToTypeNode(
+    targ, macroCall.callExpression, ts.NodeBuilderFlags.NoTruncation
+  )).filter(n => !!n);
+  if (typeArgNodes.length < typeArgs.length) {
+    const diag = createDiagnosticForMacroCall(
+      macroCall.callExpression,
+      DiagnosticMessage.MacroTypeArgFailedToBeNode,
+    );
+    context.extra.addDiagnostic(diag);
+    return undefined;
+  }
+
   const typeMap = new Map(
-    typeParamSymbols.map((tParamSym, index) => [tParamSym, typeArgs[index]!]),
+    typeParamSymbols.map((tParamSym, index) => [tParamSym, typeArgNodes[index]!]),
   );
   return typeMap;
 }
@@ -97,18 +113,37 @@ function extractTypeMap(
 function expandTypeArguments(
   context: ContextBag,
   macroCall: MacroCallExpression,
-  body: ts.FunctionBody,
-): ts.FunctionBody {
+  func: ts.FunctionExpression,
+): ts.FunctionExpression {
   const typeMap = extractTypeMap(context, macroCall);
   if (!typeMap) {
-    return body;
+    return func;
   }
   const replacementVisitor = createTypeExpansionVisitor(context, typeMap);
-  const visitedBody = ts.visitNode(body, replacementVisitor);
-  if (!visitedBody || !ts.isBlock(visitedBody)) {
-    throw "Failed to expand type arguments. Returned value is not function body. This is a bug of the transformer.";
+
+  const newParams = func.parameters
+    .map(param => ts.visitNode(param, replacementVisitor))
+    .filter(node => !!node && ts.isParameter(node));
+  const newReturnType = ts.visitNode(func.type, replacementVisitor);
+  const newBody = ts.visitNode(func.body, replacementVisitor);
+  if (
+    newParams.length !== func.parameters.length ||
+    !newReturnType || !ts.isTypeNode(newReturnType) || !newBody || !ts.isBlock(newBody)
+  ) {
+    throw "Failed to expand type arguments. Returned value is not expected type of node. This is a bug of the transformer.";
   }
-  return visitedBody;
+
+  const newFunc = ts.factory.createFunctionExpression(
+    func.modifiers,
+    func.asteriskToken,
+    func.name,
+    undefined, // type params is expanded
+    newParams,
+    newReturnType,
+    newBody,
+  );
+
+  return newFunc;
 }
 
 function createMacroExpansionVisitor(
@@ -125,23 +160,23 @@ function createMacroExpansionVisitor(
       return ts.visitEachChild(node, visitor, context.transformer);
     }
 
-    const funcBody = [
-      (body: ts.FunctionBody) => expandTypeArguments(context, macroCall, body),
-    ].reduce((body, f) => f(body), macroCall.macroDefinition.body!);
-
     const modifiers = macroCall.macroDefinition.modifiers?.filter(
       (mod) => mod.kind === ts.SyntaxKind.AsyncKeyword,
     );
 
-    const funcExpression = ts.factory.createFunctionExpression(
+    const baseFuncExpression = ts.factory.createFunctionExpression(
       modifiers, // only needed modifiers
       macroCall.macroDefinition.asteriskToken,
       undefined, // remove name
-      undefined, // type params should be expanded
+      macroCall.macroDefinition.typeParameters,
       macroCall.macroDefinition.parameters,
       macroCall.macroDefinition.type,
-      funcBody,
+      macroCall.macroDefinition.body!,
     );
+
+    const funcExpression = [
+      (func: ts.FunctionExpression) => expandTypeArguments(context, macroCall, func)
+    ].reduce((func, f) => f(func), baseFuncExpression);
 
     const iife = ts.factory.createCallExpression(
       ts.factory.createParenthesizedExpression(funcExpression),

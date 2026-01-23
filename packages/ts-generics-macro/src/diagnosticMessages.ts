@@ -73,12 +73,18 @@ export const DiagnosticMessage = {
   MacroCallTypeArgsMismatch: {
     category: ts.DiagnosticCategory.Error,
     messageText: "Type arguments did not match with definition.",
-    code: 24003,
+    code: 24100,
   },
   MacroTypeParamWithNoSymbol: {
     category: ts.DiagnosticCategory.Error,
     messageText:
       "Symbol for the type parameter of the macro definition must be available at call.",
-    code: 24004,
+    code: 24101,
+  },
+  MacroTypeArgFailedToBeNode: {
+    category: ts.DiagnosticCategory.Error,
+    messageText:
+      "Failed to convert resolved type arguments to AST node.",
+    code: 24102,
   },
 } satisfies Record<string, IDiagnosticMessage>;
