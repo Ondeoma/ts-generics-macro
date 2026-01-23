@@ -65,7 +65,7 @@ export function getSortedSources(
   );
 }
 
-export function printDiagnostics (diagnostics: ts.Diagnostic[]) {
+export function printDiagnostics (diagnostics: readonly ts.Diagnostic[]) {
   const formatDiagnosticHost = {
     getCanonicalFileName: (fileName: string) => fileName,
     getCurrentDirectory: ts.sys.getCurrentDirectory,
