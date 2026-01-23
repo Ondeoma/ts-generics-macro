@@ -7,10 +7,9 @@ import { macroDefinitionSearchTransformer, MacroSearchOptions } from '../src/def
 import { MacroDefinition } from '../src/common';
 
 
-describe("Macro defs searching", () => {
-  test("simple-macro", () => {
+function defMatch(dir: string, expected: string[]) {
     const projectRoot = "../test-fixtures";
-    const program = createProgramForDirectory(projectRoot, "simple-macro");
+    const program = createProgramForDirectory(projectRoot, dir);
 
     const macroMap = new Map<ts.Symbol, MacroDefinition>();
     const searchOptions: MacroSearchOptions = {
@@ -33,9 +32,13 @@ describe("Macro defs searching", () => {
     const actual = Array.from(
         macroMap.keys(),
         (sym) => sym.name
-      ).toSorted();
-    const expected = ["true$macro$", "add$macro$"].toSorted();
+      );
 
-    expect(actual).toEqual(expected);
-  });
+    expect(actual.toSorted()).toEqual(expected.toSorted());
+}
+
+
+describe("Macro defs searching", () => {
+  test("simple-macro", () => defMatch("simple-macro", ["true$macro$", "add$macro$"]));
+  test("generics-macro", () => defMatch("generics-macro", ["array$macro$", "push$macro$"]));
 });
