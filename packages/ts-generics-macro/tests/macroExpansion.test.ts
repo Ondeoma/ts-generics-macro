@@ -61,5 +61,5 @@ function matchExpansion(dir: string, expectedDir: string) {
 
 describe("Macro expansion", () => {
   test("simple-macro", () => matchExpansion("simple-macro", "simple-macro-expected"));
-  test("simple-macro", () => matchExpansion("generics-macro", "generics-macro-expected"));
+  test("generics-macro", () => matchExpansion("generics-macro", "generics-macro-expected"));
 });

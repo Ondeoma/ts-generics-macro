@@ -40,5 +40,5 @@ function defMatch(dir: string, expected: string[]) {
 
 describe("Macro defs searching", () => {
   test("simple-macro", () => defMatch("simple-macro", ["true$macro$", "add$macro$"]));
-  test("generics-macro", () => defMatch("generics-macro", ["array$macro$", "push$macro$"]));
+  test("generics-macro", () => defMatch("generics-macro", ["array$macro$", "push$macro$", "nested$macro$"]));
 });
