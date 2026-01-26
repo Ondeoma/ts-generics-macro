@@ -12,6 +12,7 @@ import {
   MacroMap,
   Options,
 } from "./common";
+import { getOriginalRootSymbol } from "./utils";
 
 function createMacroDefinitionSearchVisitor(
   context: ContextBag,
@@ -20,7 +21,7 @@ function createMacroDefinitionSearchVisitor(
   const visitor: ts.Visitor = (node: ts.Node) => {
     if (isMacroDefinition(node, context.options)) {
       const symbol =
-        node.name && context.checker.getSymbolAtLocation(node.name);
+        node.name && getOriginalRootSymbol(node.name, context.checker);
       if (!symbol) {
         const diag: ts.DiagnosticWithLocation = createDiagnosticForMacroDef(
           node,
