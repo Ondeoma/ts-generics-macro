@@ -94,7 +94,7 @@ function applyTypeMapOnType(
 
   // for alias
   if (t.aliasSymbol && t.aliasTypeArguments && t.aliasTypeArguments.length > 0) {
-    throw "TODO: not implemented yet."
+    throw "TODO: alias -- not implemented yet."
   }
 
   // for reference like Array<T>
@@ -114,14 +114,14 @@ function applyTypeMapOnType(
 
   // for object literal
   if (isObjectType(t) && (t.objectFlags & ts.ObjectFlags.Anonymous)) {
-    throw "TODO: not implemented yet."
+    return applyTypeMapOnObjectType(t, context, parentTypeMap, node)
   }
 
   if (t.isUnion()) {
-    throw "TODO: not implemented yet."
+    throw "TODO: union -- not implemented yet."
   }
   if (t.isIntersection()) {
-    throw "TODO: not implemented yet."
+    throw "TODO: intersection -- not implemented yet."
   }
 
   return context.checker.typeToTypeNode(
@@ -130,6 +130,34 @@ function applyTypeMapOnType(
       ts.NodeBuilderFlags.NoTruncation
   )!;
 }
+
+function applyTypeMapOnObjectType(
+  type: ts.ObjectType,
+  context: ContextBag,
+  parentTypeMap: Map<ts.Symbol, ts.TypeNode>,
+  node: ts.Node,
+): ts.TypeLiteralNode {
+  const properties = type.getProperties();
+
+  const members: ts.TypeElement[] = properties.map(propSymbol => {
+    const isOptional = (propSymbol.flags & ts.SymbolFlags.Optional) !== 0;
+    const propType = context.checker.getTypeOfSymbolAtLocation(propSymbol, node);
+    const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, node);
+
+    return ts.factory.createPropertySignature(
+      undefined,
+      propSymbol.name,
+      isOptional ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+      typeNode
+    );
+  });
+
+  // TODO: index signature ... ([key: string]: any)
+  // const indexInfos = checker.getIndexInfosOfType(type); ...
+
+  return ts.factory.createTypeLiteralNode(members);
+}
+
 
 export function expandTypeArguments(
   context: ContextBag,
@@ -146,11 +174,14 @@ export function expandTypeArguments(
     .filter(node => !!node && ts.isParameter(node));
   const newReturnType = ts.visitNode(func.type, replacementVisitor);
   const newBody = ts.visitNode(func.body, replacementVisitor);
-  if (
-    newParams.length !== func.parameters.length ||
-    !newReturnType || !ts.isTypeNode(newReturnType) || !newBody || !ts.isBlock(newBody)
-  ) {
-    throw "Failed to expand type arguments. Returned value is not expected type of node. This is a bug of the transformer.";
+  if (newParams.length !== func.parameters.length) {
+    throw "Failed to expand type arguments. Number of parameters has been changed. This is a bug of the transformer.";
+  }
+  if (!(newReturnType && ts.isTypeNode(newReturnType)) && !(!func.type && !newReturnType)) {
+    throw "Failed to expand type arguments. Returned return-type was not type node. This is a bug of the transformer.";
+  }
+  if (!newBody || !ts.isBlock(newBody)) {
+    throw "Failed to expand type arguments. Returned function body is not block. This is a bug of the transformer.";
   }
 
   const newFunc = ts.factory.createFunctionExpression(
