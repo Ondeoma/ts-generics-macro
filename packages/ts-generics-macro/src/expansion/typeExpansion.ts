@@ -127,8 +127,10 @@ function applyTypeMapOnType(
     const newTypes = t.types.map(t => applyTypeMapOnType(t, context, parentTypeMap, node));
     return ts.factory.createUnionTypeNode(newTypes);
   }
+
   if (t.isIntersection()) {
-    throw "TODO: intersection -- not implemented yet."
+    const newTypes = t.types.map(t => applyTypeMapOnType(t, context, parentTypeMap, node));
+    return ts.factory.createIntersectionTypeNode(newTypes);
   }
 
   return context.checker.typeToTypeNode(

@@ -28,6 +28,10 @@ function genericFn<T>(arg: T) {
       return new Array<Array<T> | {b: T}>();
     })([arg]);
 
+    (function (arg: Array<T> & {b: T}): (Array<T> & {b: T})[] {
+      return new Array<Array<T> & {b: T}>();
+    })(Object.assign([arg], { b: arg }));
+
   })(arg);
 }
 
@@ -59,4 +63,9 @@ genericFn(1);
   (function (arg: Array<number> | {b: number}): (Array<number> | {b: number})[] {
     return new Array<Array<number> | {b: number}>();
   })([arg]);
+
+  (function (arg: Array<number> & {b: number}): (Array<number> & {b: number})[] {
+    return new Array<Array<number> & {b: number}>();
+  })(Object.assign([arg], { b: arg }));
+
 })(1);
