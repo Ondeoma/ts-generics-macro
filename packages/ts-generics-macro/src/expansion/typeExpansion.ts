@@ -2,7 +2,11 @@ import ts from "typescript";
 import { ContextBag } from "../common";
 import { getOriginalRootSymbol, isObjectType, isTypeReference } from "../utils";
 import { MacroCallExpression } from "../expansion";
-import { createDiagnostic, createDiagnosticForMacroCall, DiagnosticMessage } from "../diagnosticMessages";
+import {
+  createDiagnostic,
+  createDiagnosticForMacroCall,
+  DiagnosticMessage,
+} from "../diagnosticMessages";
 
 export type TypeMap = Map<ts.Symbol, ts.TypeNode>;
 
@@ -30,20 +34,20 @@ export function extractTypeMap(
   macroCall: MacroCallExpression,
   parentTypeMap: TypeMap,
 ): TypeMap {
-  const signature = context.checker.getResolvedSignature(macroCall.callExpression);
+  const signature = context.checker.getResolvedSignature(
+    macroCall.callExpression,
+  );
   if (!signature) {
     return parentTypeMap;
   }
   const typeParams = macroCall.macroDefinition.typeParameters;
-  const typeArgs = context.checker.getTypeArgumentsForResolvedSignature(signature);
+  const typeArgs =
+    context.checker.getTypeArgumentsForResolvedSignature(signature);
 
   if (!typeParams) {
     return parentTypeMap;
   }
-  if (
-    typeArgs === undefined ||
-    typeParams.length != typeArgs.length
-  ) {
+  if (typeArgs === undefined || typeParams.length != typeArgs.length) {
     const diag = createDiagnosticForMacroCall(
       macroCall.callExpression,
       DiagnosticMessage.MacroCallTypeArgsMismatch,
@@ -64,16 +68,19 @@ export function extractTypeMap(
     return parentTypeMap;
   }
 
-  const typeArgNodes = typeArgs.map(tArg => applyTypeMapOnType(tArg, context, parentTypeMap, macroCall.callExpression));
+  const typeArgNodes = typeArgs.map((tArg) =>
+    applyTypeMapOnType(tArg, context, parentTypeMap, macroCall.callExpression),
+  );
 
   const currentTypeMap = new Map(
-    typeParamSymbols.map((tParamSym, index) => [tParamSym, typeArgNodes[index]!]),
+    typeParamSymbols.map((tParamSym, index) => [
+      tParamSym,
+      typeArgNodes[index]!,
+    ]),
   );
   const typeMap = new Map([...parentTypeMap, ...currentTypeMap]);
   return typeMap;
-
 }
-
 
 /*
 To get inferred types, we need `checker.getTypeArgumentsForResolvedSignature` which returns `ts.Type[] | undefined`.
@@ -93,13 +100,17 @@ function applyTypeMapOnType(
   }
 
   // for alias
-  if (t.aliasSymbol && t.aliasTypeArguments && t.aliasTypeArguments.length > 0) {
-    const newTypeArguments = t.aliasTypeArguments.map(argType => 
-      applyTypeMapOnType(argType, context, parentTypeMap, node)
+  if (
+    t.aliasSymbol &&
+    t.aliasTypeArguments &&
+    t.aliasTypeArguments.length > 0
+  ) {
+    const newTypeArguments = t.aliasTypeArguments.map((argType) =>
+      applyTypeMapOnType(argType, context, parentTypeMap, node),
     );
     return ts.factory.createTypeReferenceNode(
       t.aliasSymbol.name,
-      newTypeArguments
+      newTypeArguments,
     );
   }
 
@@ -107,36 +118,37 @@ function applyTypeMapOnType(
   if (isObjectType(t) && isTypeReference(t)) {
     const typeArgs = context.checker.getTypeArguments(t);
     if (0 < typeArgs.length) {
-      const newTypeArguments = typeArgs.map(argType => 
-        applyTypeMapOnType(argType, context, parentTypeMap, node)
+      const newTypeArguments = typeArgs.map((argType) =>
+        applyTypeMapOnType(argType, context, parentTypeMap, node),
       );
       const targetName = t.symbol.name;
-      return ts.factory.createTypeReferenceNode(
-        targetName,
-        newTypeArguments
-      );
+      return ts.factory.createTypeReferenceNode(targetName, newTypeArguments);
     }
   }
 
   // for object literal
-  if (isObjectType(t) && (t.objectFlags & ts.ObjectFlags.Anonymous)) {
-    return applyTypeMapOnObjectType(t, context, parentTypeMap, node)
+  if (isObjectType(t) && t.objectFlags & ts.ObjectFlags.Anonymous) {
+    return applyTypeMapOnObjectType(t, context, parentTypeMap, node);
   }
 
   if (t.isUnion()) {
-    const newTypes = t.types.map(t => applyTypeMapOnType(t, context, parentTypeMap, node));
+    const newTypes = t.types.map((t) =>
+      applyTypeMapOnType(t, context, parentTypeMap, node),
+    );
     return ts.factory.createUnionTypeNode(newTypes);
   }
 
   if (t.isIntersection()) {
-    const newTypes = t.types.map(t => applyTypeMapOnType(t, context, parentTypeMap, node));
+    const newTypes = t.types.map((t) =>
+      applyTypeMapOnType(t, context, parentTypeMap, node),
+    );
     return ts.factory.createIntersectionTypeNode(newTypes);
   }
 
   return context.checker.typeToTypeNode(
-      t,
-      node,
-      ts.NodeBuilderFlags.NoTruncation
+    t,
+    node,
+    ts.NodeBuilderFlags.NoTruncation,
   )!;
 }
 
@@ -148,16 +160,21 @@ function applyTypeMapOnObjectType(
 ): ts.TypeLiteralNode {
   const properties = type.getProperties();
 
-  const members: ts.TypeElement[] = properties.map(propSymbol => {
+  const members: ts.TypeElement[] = properties.map((propSymbol) => {
     const isOptional = (propSymbol.flags & ts.SymbolFlags.Optional) !== 0;
-    const propType = context.checker.getTypeOfSymbolAtLocation(propSymbol, node);
+    const propType = context.checker.getTypeOfSymbolAtLocation(
+      propSymbol,
+      node,
+    );
     const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, node);
 
     return ts.factory.createPropertySignature(
       undefined,
       propSymbol.name,
-      isOptional ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-      typeNode
+      isOptional
+        ? ts.factory.createToken(ts.SyntaxKind.QuestionToken)
+        : undefined,
+      typeNode,
     );
   });
 
@@ -166,7 +183,6 @@ function applyTypeMapOnObjectType(
 
   return ts.factory.createTypeLiteralNode(members);
 }
-
 
 export function expandTypeArguments(
   context: ContextBag,
@@ -179,14 +195,17 @@ export function expandTypeArguments(
   const replacementVisitor = createTypeExpansionVisitor(context, typeMap);
 
   const newParams = func.parameters
-    .map(param => ts.visitNode(param, replacementVisitor))
-    .filter(node => !!node && ts.isParameter(node));
+    .map((param) => ts.visitNode(param, replacementVisitor))
+    .filter((node) => !!node && ts.isParameter(node));
   const newReturnType = ts.visitNode(func.type, replacementVisitor);
   const newBody = ts.visitNode(func.body, replacementVisitor);
   if (newParams.length !== func.parameters.length) {
     throw "Failed to expand type arguments. Number of parameters has been changed. This is a bug of the transformer.";
   }
-  if (!(newReturnType && ts.isTypeNode(newReturnType)) && !(!func.type && !newReturnType)) {
+  if (
+    !(newReturnType && ts.isTypeNode(newReturnType)) &&
+    !(!func.type && !newReturnType)
+  ) {
     throw "Failed to expand type arguments. Returned return-type was not type node. This is a bug of the transformer.";
   }
   if (!newBody || !ts.isBlock(newBody)) {

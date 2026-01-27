@@ -1,9 +1,7 @@
 import ts from "typescript";
 import { ContextBag } from "../common";
 
-export function createCommentOmissionVisitor(
-  context: ContextBag,
-): ts.Visitor {
+export function createCommentOmissionVisitor(context: ContextBag): ts.Visitor {
   const visitor: ts.Visitor = (node: ts.Node): ts.Node => {
     const visited = ts.visitEachChild(node, visitor, context.transformer);
     return ts.setEmitFlags(visited, ts.EmitFlags.NoComments);

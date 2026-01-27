@@ -3,7 +3,11 @@ import type { TransformerExtras } from "ts-patch";
 
 import { ContextBag, MacroDefinition, MacroMap, Options } from "./common";
 import { getOriginalRootSymbol } from "./utils";
-import { expandTypeArguments, extractTypeMap, TypeMap } from "./expansion/typeExpansion";
+import {
+  expandTypeArguments,
+  extractTypeMap,
+  TypeMap,
+} from "./expansion/typeExpansion";
 import { omitComments } from "./expansion/commentOmission";
 
 export type MacroCallExpression = {
@@ -53,8 +57,16 @@ function createMacroExpansionVisitor(
       (mod) => mod.kind === ts.SyntaxKind.AsyncKeyword,
     );
 
-    const reccurentVisitor = createMacroExpansionVisitor(context, macroMap, typeMap);
-    const body = ts.visitEachChild(macroCall.macroDefinition.body!, reccurentVisitor, context.transformer)
+    const reccurentVisitor = createMacroExpansionVisitor(
+      context,
+      macroMap,
+      typeMap,
+    );
+    const body = ts.visitEachChild(
+      macroCall.macroDefinition.body!,
+      reccurentVisitor,
+      context.transformer,
+    );
     if (!body || !ts.isBlock(body)) {
       throw "Failed to expand macro body. Returned value is not expected type of node. This is a bug of the transformer.";
     }
@@ -71,7 +83,8 @@ function createMacroExpansionVisitor(
 
     const funcExpression = [
       (func: ts.FunctionExpression) => omitComments(context, func),
-      (func: ts.FunctionExpression) => expandTypeArguments(context, func, typeMap),
+      (func: ts.FunctionExpression) =>
+        expandTypeArguments(context, func, typeMap),
     ].reduce((func, f) => f(func), baseFuncExpression);
 
     const iife = ts.factory.createCallExpression(

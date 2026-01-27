@@ -15,12 +15,11 @@ interface PrimitiveRef<T extends Primitive> {
   value: T;
 }
 
-
 export function getOriginalRootSymbol(
   node: ts.Node,
   checker: ts.TypeChecker,
 ): ts.Symbol | undefined {
-  const sym = checker.getSymbolAtLocation(ts.getOriginalNode(node))
+  const sym = checker.getSymbolAtLocation(ts.getOriginalNode(node));
   return sym && getRootSymbol(sym, checker);
 }
 

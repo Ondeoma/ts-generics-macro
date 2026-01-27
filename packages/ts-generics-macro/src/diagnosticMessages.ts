@@ -88,8 +88,7 @@ export const DiagnosticMessage = {
   },
   MacroTypeArgFailedToBeNode: {
     category: ts.DiagnosticCategory.Error,
-    messageText:
-      "Failed to convert resolved type arguments to AST node.",
+    messageText: "Failed to convert resolved type arguments to AST node.",
     code: 24102,
   },
 } satisfies Record<string, IDiagnosticMessage>;
