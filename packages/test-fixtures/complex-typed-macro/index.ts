@@ -16,6 +16,8 @@ function m1$macro$<T1>(
   m2$macro$<ArrayT<T1>>([arg]);
 
   m2$macro$<Omit<typeof obj, "a">>({b: arg});
+
+  m2$macro$<Array<T1> | {b: T1}>([arg]);
 }
 
 function m2$macro$<T2>(
