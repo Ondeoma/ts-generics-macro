@@ -22,8 +22,7 @@ export function isMacroIdent(name: ts.MemberName, options: Options): boolean {
   return name.text.endsWith(options.macroSuffix);
 }
 
-export interface MacroDefinitionMarker {} // just marker
-export type MacroDefinition = ts.FunctionDeclaration & MacroDefinitionMarker;
+export type MacroDefinition = ts.FunctionDeclaration & {__isMacroBrand: "isMacro"};
 
 export function isMacroDefinition(
   node: ts.Node,
