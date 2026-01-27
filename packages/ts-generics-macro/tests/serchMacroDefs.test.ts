@@ -21,7 +21,7 @@ function defMatch(dir: string, expected: string[]) {
     const extra: TransformerExtras = createMockExtra();
     const factory = macroDefinitionSearchTransformer(program, searchOptions, extra);
 
-    const transformationResult = ts.transform(
+    const _transformationResult = ts.transform(
       program
         .getSourceFiles()
         .filter(file => !file.isDeclarationFile),

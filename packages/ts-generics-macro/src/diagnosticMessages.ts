@@ -1,5 +1,4 @@
 import ts from "typescript";
-import { enforceMembersImplement } from "./utils";
 
 interface IDiagnosticMessage {
   category: ts.DiagnosticCategory;

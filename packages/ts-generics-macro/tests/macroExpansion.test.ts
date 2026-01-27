@@ -1,7 +1,6 @@
 import ts from 'typescript';
-import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { createMockExtra, createProgramForDirectory, getSortedSources, printDiagnostics } from './util';
+import { createMockExtra, createProgramForDirectory, printDiagnostics } from './util';
 import type { TransformerExtras } from "ts-patch";
 
 import { macroDefinitionSearchTransformer, MacroSearchOptions } from '../src/definitionSearch';

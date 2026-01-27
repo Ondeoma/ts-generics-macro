@@ -3,7 +3,6 @@ import { ContextBag } from "../common";
 import { getOriginalRootSymbol, isObjectType, isTypeReference } from "../utils";
 import { MacroCallExpression } from "../expansion";
 import {
-  createDiagnostic,
   createDiagnosticForMacroCall,
   DiagnosticMessage,
 } from "../diagnosticMessages";

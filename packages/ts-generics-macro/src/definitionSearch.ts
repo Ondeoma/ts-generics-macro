@@ -5,13 +5,7 @@ import {
   createDiagnosticForMacroDef,
   DiagnosticMessage,
 } from "./diagnosticMessages";
-import {
-  ContextBag,
-  isMacroDefinition,
-  MacroDefinition,
-  MacroMap,
-  Options,
-} from "./common";
+import { ContextBag, isMacroDefinition, MacroMap, Options } from "./common";
 import { getOriginalRootSymbol } from "./utils";
 
 function createMacroDefinitionSearchVisitor(
