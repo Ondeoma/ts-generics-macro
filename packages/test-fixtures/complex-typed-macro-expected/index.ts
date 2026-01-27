@@ -20,6 +20,10 @@ function genericFn<T>(arg: T) {
       return new Array<ArrayT<T>>();
     })([arg]);
 
+    (function (arg: Omit<{a: string, b: T}, "a">): Omit<{a: string, b: T}, "a">[] {
+      return new Array<Omit<{a: string, b: T}, "a">>();
+    })({b: arg});
+
   })(arg);
 }
 
@@ -43,5 +47,9 @@ genericFn(1);
   (function (arg: ArrayT<number>): ArrayT<number>[] {
     return new Array<ArrayT<number>>();
   })([arg]);
+
+  (function (arg: Omit<{a: string, b: number}, "a">): Omit<{a: string, b: number}, "a">[] {
+    return new Array<Omit<{a: string, b: number}, "a">>();
+  })({b: arg});
 
 })(1);
