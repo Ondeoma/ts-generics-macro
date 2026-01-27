@@ -23,3 +23,16 @@ export function isObjectType(type: ts.Type): type is ts.ObjectType {
 export function isTypeReference(type: ts.ObjectType): type is ts.TypeReference {
   return (type.objectFlags & ts.ObjectFlags.Reference) !== 0;
 }
+
+export function composedTransformer(
+  _program: ts.Program,
+  factories: ts.TransformerFactory<ts.SourceFile>[],
+): ts.TransformerFactory<ts.SourceFile> {
+  return (context) => {
+    return (sourceFile) => {
+      return factories.reduce((source, factory) => {
+        return factory(context)(source);
+      }, sourceFile);
+    };
+  };
+}
