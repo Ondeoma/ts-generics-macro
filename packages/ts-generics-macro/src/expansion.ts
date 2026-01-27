@@ -4,6 +4,7 @@ import type { TransformerExtras } from "ts-patch";
 import { ContextBag, MacroDefinition, MacroMap, Options } from "./common";
 import { getOriginalRootSymbol } from "./utils";
 import { expandTypeArguments, extractTypeMap, TypeMap } from "./expansion/typeExpansion";
+import { omitComments } from "./expansion/commentOmission";
 
 export type MacroCallExpression = {
   callExpression: ts.CallExpression;
@@ -69,6 +70,7 @@ function createMacroExpansionVisitor(
     );
 
     const funcExpression = [
+      (func: ts.FunctionExpression) => omitComments(context, func),
       (func: ts.FunctionExpression) => expandTypeArguments(context, func, typeMap),
     ].reduce((func, f) => f(func), baseFuncExpression);
 
