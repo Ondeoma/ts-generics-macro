@@ -12,10 +12,10 @@ function m1$macro$<T1>(
   };
   m2$macro$(obj);
 
-  /*
-  type TObj = typeof obj;
-  m2$macro$<TObj>(obj);
+  type ArrayT<T> = Array<T>;
+  m2$macro$<ArrayT<T1>>([arg]);
 
+  /*
   // T2 = {b: T1}
   m2$macro$<Omit<typeof obj, "a">>(obj);
   */

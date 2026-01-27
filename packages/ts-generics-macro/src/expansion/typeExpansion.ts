@@ -94,7 +94,13 @@ function applyTypeMapOnType(
 
   // for alias
   if (t.aliasSymbol && t.aliasTypeArguments && t.aliasTypeArguments.length > 0) {
-    throw "TODO: alias -- not implemented yet."
+    const newTypeArguments = t.aliasTypeArguments.map(argType => 
+      applyTypeMapOnType(argType, context, parentTypeMap, node)
+    );
+    return ts.factory.createTypeReferenceNode(
+      t.aliasSymbol.name,
+      newTypeArguments
+    );
   }
 
   // for reference like Array<T>
