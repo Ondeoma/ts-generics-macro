@@ -7,7 +7,7 @@ import {
   MacroSearchOptions,
 } from "./definitionSearch";
 
-type MacroOptions = RecursivePartial<
+export type MacroOptions = RecursivePartial<
   Omit<MacroSearchOptions & MacroExpansionOptions, "macroMap">
 >;
 
