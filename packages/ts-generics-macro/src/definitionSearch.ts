@@ -33,8 +33,7 @@ function createMacroDefinitionSearchVisitor(
   return visitor;
 }
 
-export interface MacroSearchOptions {
-  globalOptions: Options;
+export interface MacroSearchOptions extends Options {
   macroMap: MacroMap;
 }
 
@@ -52,7 +51,7 @@ export function macroDefinitionSearchTransformer(
   const factory = ((transformationContext: ts.TransformationContext) =>
     (sourceFile: ts.SourceFile) => {
       const context = {
-        options: options.globalOptions,
+        options,
         program,
         checker,
         printer,

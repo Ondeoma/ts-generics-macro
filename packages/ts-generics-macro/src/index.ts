@@ -1,16 +1,32 @@
 import ts from "typescript";
 import { MacroExpansionOptions, macroExpansionTransformer } from "./expansion";
 import { TransformerExtras } from "ts-patch";
-import { composedTransformer } from "./utils";
-import { macroDefinitionSearchTransformer } from "./definitionSearch";
+import { composedTransformer, RecursivePartial } from "./utils";
+import {
+  macroDefinitionSearchTransformer,
+  MacroSearchOptions,
+} from "./definitionSearch";
 
-export function macroTransformer(
+type MacroOptions = RecursivePartial<
+  Omit<MacroSearchOptions & MacroExpansionOptions, "macroMap">
+>;
+
+export default function macroTransformer(
   program: ts.Program,
-  options: MacroExpansionOptions,
+  options: MacroOptions,
   extra: TransformerExtras,
 ): ts.TransformerFactory<ts.SourceFile> {
+  const defaultOptisons: MacroSearchOptions & MacroExpansionOptions = {
+    macroSuffix: "$macro$",
+    macroMap: new Map(),
+  };
+  const exactOptions = {
+    ...options,
+    ...defaultOptisons,
+  };
+
   return composedTransformer(program, [
-    macroDefinitionSearchTransformer(program, options, extra),
-    macroExpansionTransformer(program, options, extra),
+    macroDefinitionSearchTransformer(program, exactOptions, extra),
+    macroExpansionTransformer(program, exactOptions, extra),
   ]);
 }

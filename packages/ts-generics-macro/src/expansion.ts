@@ -99,8 +99,7 @@ function createMacroExpansionVisitor(
   return visitor;
 }
 
-export interface MacroExpansionOptions {
-  globalOptions: Options;
+export interface MacroExpansionOptions extends Options {
   macroMap: MacroMap;
 }
 
@@ -118,7 +117,7 @@ export function macroExpansionTransformer(
   const factory = ((transformationContext: ts.TransformationContext) =>
     (sourceFile: ts.SourceFile) => {
       const context = {
-        options: options.globalOptions,
+        options,
         program,
         checker,
         printer,

@@ -13,9 +13,7 @@ function defMatch(dir: string, expected: string[]) {
 
     const macroMap = new Map<ts.Symbol, MacroDefinition>();
     const searchOptions: MacroSearchOptions = {
-      globalOptions: {
-        macroSuffix: "$macro$",
-      },
+      macroSuffix: "$macro$",
       macroMap,
     }
     const extra: TransformerExtras = createMockExtra();

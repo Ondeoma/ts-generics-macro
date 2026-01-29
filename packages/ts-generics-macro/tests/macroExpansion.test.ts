@@ -14,9 +14,7 @@ function matchExpansion(dir: string, expectedDir: string) {
 
   const macroMap = new Map<ts.Symbol, MacroDefinition>();
   const searchOptions: MacroSearchOptions = {
-    globalOptions: {
-      macroSuffix: "$macro$",
-    },
+    macroSuffix: "$macro$",
     macroMap,
   };
   const expansionOptions: MacroExpansionOptions = searchOptions;
