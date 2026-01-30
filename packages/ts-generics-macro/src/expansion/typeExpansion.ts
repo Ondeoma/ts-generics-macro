@@ -33,8 +33,12 @@ export function extractTypeMap(
   macroCall: MacroCallExpression,
   parentTypeMap: TypeMap,
 ): TypeMap {
+  const originalCallExpression = ts.getOriginalNode(macroCall.callExpression);
+  if (!ts.isCallExpression(originalCallExpression)) {
+    return parentTypeMap;
+  }
   const signature = context.checker.getResolvedSignature(
-    macroCall.callExpression,
+    originalCallExpression,
   );
   if (!signature) {
     return parentTypeMap;
@@ -146,7 +150,7 @@ function applyTypeMapOnType(
 
   return context.checker.typeToTypeNode(
     t,
-    node,
+    ts.getOriginalNode(node),
     ts.NodeBuilderFlags.NoTruncation,
   )!;
 }
@@ -163,7 +167,7 @@ function applyTypeMapOnObjectType(
     const isOptional = (propSymbol.flags & ts.SymbolFlags.Optional) !== 0;
     const propType = context.checker.getTypeOfSymbolAtLocation(
       propSymbol,
-      node,
+      ts.getOriginalNode(node),
     );
     const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, node);
 
