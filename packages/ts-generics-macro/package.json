@@ -1,10 +1,19 @@
 {
-  "name": "ts-generics-macro",
-  "version": "0.1.0",
+  "name": "@ondeoma/ts-generics-macro",
+  "version": "0.0.0",
   "description": "Macros with type generics for TypeScript",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepack": "shx cp ../../README.md . && shx cp ../../LICENSE .",
     "test": "vitest run",
     "test:watch": "vitest",
     "prettier": "prettier src --check",
@@ -12,14 +21,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://hirano_ds@bitbucket.org/octava/ts-generics-macro.git"
+    "url": "git+https://github.com/Ondeoma/ts-generics-macro.git"
   },
   "author": "hyranno",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitbucket.org/octava/ts-generics-macro/issues"
+    "url": "https://github.com/Ondeoma/ts-generics-macro/issues"
   },
-  "homepage": "https://bitbucket.org/octava/ts-generics-macro#readme",
+  "homepage": "https://github.com/Ondeoma/ts-generics-macro#readme",
   "peerDependencies": {
     "typescript": "^5.0.0"
   },

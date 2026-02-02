@@ -5,9 +5,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w ts-generics-macro",
-    "test": "npm run test -w ts-generics-macro",
-    "test:watch": "npm run test:watch -w ts-generics-macro",
+    "build": "npm run build -w @ondeoma/ts-generics-macro",
+    "test": "npm run test -w @ondeoma/ts-generics-macro",
+    "test:watch": "npm run test:watch -w @ondeoma/ts-generics-macro",
     "eslint": "eslint",
     "eslint:fix": "eslint --fix",
     "prettier": "npm run prettier --workspaces",
@@ -22,6 +22,7 @@
     "globals": "^16.5.0",
     "jiti": "^2.6.1",
     "prettier": "^3.6.2",
+    "shx": "^0.4.0",
     "typescript-eslint": "^8.46.3"
   }
 }
