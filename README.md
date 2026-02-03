@@ -20,7 +20,7 @@ Add it to your `tsconfig.json`:
 {
   "compilerOptions": {
     "plugins": [
-      {"transform": "ts-generics-macro"}
+      {"transform": "@ondeoma/ts-generics-macro"}
     ]
   }
 }
