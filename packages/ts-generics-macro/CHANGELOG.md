@@ -1,5 +1,11 @@
 # @ondeoma/ts-generics-macro
 
+## 0.0.2
+
+### Patch Changes
+
+- 6b8eac7: fix inter-file call
+
 ## 0.0.1
 
 ### Patch Changes
