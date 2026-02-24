@@ -129,6 +129,24 @@ function applyTypeMapOnType(
     }
   }
 
+  // for callable
+  const signatures = context.checker.getSignaturesOfType(t, ts.SignatureKind.Call);
+  const signatureDeclaration = signatures[0] && context.checker.signatureToSignatureDeclaration(
+    signatures[0],
+    ts.SyntaxKind.FunctionType,
+    ts.getOriginalNode(node),
+    ts.NodeBuilderFlags.NoTruncation
+  );
+  if (signatureDeclaration && ts.isFunctionTypeNode(signatureDeclaration)) {
+    const replacementVisitor = createTypeExpansionVisitor(context, parentTypeMap);
+    const visited = ts.visitNode(signatureDeclaration, replacementVisitor);
+    if (visited && ts.isTypeNode(visited)) {
+      return visited;
+    } else {
+      throw "Expected TypeNode.";
+    }
+  }
+
   // for object literal
   if (isObjectType(t) && t.objectFlags & ts.ObjectFlags.Anonymous) {
     return applyTypeMapOnObjectType(t, context, parentTypeMap, node);

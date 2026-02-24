@@ -61,4 +61,5 @@ describe("Macro expansion", () => {
   test("generics-macro", () => matchExpansion("generics-macro", "generics-macro-expected"));
   test("complex-typed-macro", () => matchExpansion("complex-typed-macro", "complex-typed-macro-expected"));
   test("inter-file-call", () => matchExpansion("inter-file-call", "inter-file-call-expected"));
+  test("func-type-expansion", () => matchExpansion("func-type-expansion", "func-type-expansion-expected"));
 });
