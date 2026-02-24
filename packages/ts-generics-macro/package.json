@@ -1,6 +1,6 @@
 {
   "name": "@ondeoma/ts-generics-macro",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Macros with type generics for TypeScript",
   "main": "dist/index.js",
   "publishConfig": {

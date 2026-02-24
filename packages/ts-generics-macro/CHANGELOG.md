@@ -1,5 +1,11 @@
 # @ondeoma/ts-generics-macro
 
+## 0.0.3
+
+### Patch Changes
+
+- ecf13a5: fix func type expansion
+
 ## 0.0.2
 
 ### Patch Changes
