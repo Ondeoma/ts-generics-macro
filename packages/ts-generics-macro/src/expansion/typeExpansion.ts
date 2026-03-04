@@ -95,7 +95,7 @@ function applyTypeMapOnType(
   t: ts.Type,
   context: ContextBag,
   parentTypeMap: TypeMap,
-  node: ts.Node,
+  callSite: ts.CallExpression,
 ): ts.TypeNode {
   // recursively apply this
   if (t.isTypeParameter() && t.symbol && parentTypeMap.has(t.symbol)) {
@@ -109,7 +109,7 @@ function applyTypeMapOnType(
     t.aliasTypeArguments.length > 0
   ) {
     const newTypeArguments = t.aliasTypeArguments.map((argType) =>
-      applyTypeMapOnType(argType, context, parentTypeMap, node),
+      applyTypeMapOnType(argType, context, parentTypeMap, callSite),
     );
     return ts.factory.createTypeReferenceNode(
       t.aliasSymbol.name,
@@ -122,7 +122,7 @@ function applyTypeMapOnType(
     const typeArgs = context.checker.getTypeArguments(t);
     if (0 < typeArgs.length) {
       const newTypeArguments = typeArgs.map((argType) =>
-        applyTypeMapOnType(argType, context, parentTypeMap, node),
+        applyTypeMapOnType(argType, context, parentTypeMap, callSite),
       );
       const targetName = t.symbol.name;
       return ts.factory.createTypeReferenceNode(targetName, newTypeArguments);
@@ -139,7 +139,7 @@ function applyTypeMapOnType(
     context.checker.signatureToSignatureDeclaration(
       signatures[0],
       ts.SyntaxKind.FunctionType,
-      ts.getOriginalNode(node),
+      ts.getOriginalNode(callSite),
       ts.NodeBuilderFlags.NoTruncation,
     );
   if (signatureDeclaration && ts.isFunctionTypeNode(signatureDeclaration)) {
@@ -157,26 +157,26 @@ function applyTypeMapOnType(
 
   // for object literal
   if (isObjectType(t) && t.objectFlags & ts.ObjectFlags.Anonymous) {
-    return applyTypeMapOnObjectType(t, context, parentTypeMap, node);
+    return applyTypeMapOnObjectType(t, context, parentTypeMap, callSite);
   }
 
   if (t.isUnion()) {
     const newTypes = t.types.map((t) =>
-      applyTypeMapOnType(t, context, parentTypeMap, node),
+      applyTypeMapOnType(t, context, parentTypeMap, callSite),
     );
     return ts.factory.createUnionTypeNode(newTypes);
   }
 
   if (t.isIntersection()) {
     const newTypes = t.types.map((t) =>
-      applyTypeMapOnType(t, context, parentTypeMap, node),
+      applyTypeMapOnType(t, context, parentTypeMap, callSite),
     );
     return ts.factory.createIntersectionTypeNode(newTypes);
   }
 
   return context.checker.typeToTypeNode(
     t,
-    ts.getOriginalNode(node),
+    callSite,
     ts.NodeBuilderFlags.NoTruncation,
   )!;
 }
@@ -185,7 +185,7 @@ function applyTypeMapOnObjectType(
   type: ts.ObjectType,
   context: ContextBag,
   parentTypeMap: Map<ts.Symbol, ts.TypeNode>,
-  node: ts.Node,
+  callSite: ts.CallExpression,
 ): ts.TypeLiteralNode {
   const properties = type.getProperties();
 
@@ -193,9 +193,9 @@ function applyTypeMapOnObjectType(
     const isOptional = (propSymbol.flags & ts.SymbolFlags.Optional) !== 0;
     const propType = context.checker.getTypeOfSymbolAtLocation(
       propSymbol,
-      ts.getOriginalNode(node),
+      ts.getOriginalNode(callSite),
     );
-    const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, node);
+    const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, callSite);
 
     return ts.factory.createPropertySignature(
       undefined,

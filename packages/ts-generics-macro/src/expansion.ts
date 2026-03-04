@@ -9,6 +9,7 @@ import {
   TypeMap,
 } from "./expansion/typeExpansion";
 import { omitComments } from "./expansion/commentOmission";
+import { createStripOriginalVisitor } from "./expansion/originalStripping";
 
 export type MacroCallExpression = {
   callExpression: ts.CallExpression;
@@ -81,29 +82,12 @@ function createMacroExpansionVisitor(
       body,
     );
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    // Printer may fail on inter-file call if TextRange is not stripped.
-    const stripOriginalVisitor = (node: ts.Node) => {
-      const visited: ts.Node = ts.visitEachChild(
-        node,
-        stripOriginalVisitor,
-        context.transformer,
-      );
-      const stripped = ts.setTextRange(visited, undefined);
-      // Force strip
-      (stripped as any).pos = -1;
-      (stripped as any).end = -1;
-      if (-1 < stripped.pos || -1 < stripped.end)
-        throw `Failed to strip text range: (${stripped.pos}, ${stripped.end})`;
-      return stripped;
-    };
-
     const funcExpression = [
       (func: ts.FunctionExpression) => omitComments(context, func),
       (func: ts.FunctionExpression) =>
         expandTypeArguments(context, func, typeMap),
       (func: ts.FunctionExpression) =>
-        ts.visitEachChild(func, stripOriginalVisitor, context.transformer),
+        ts.visitEachChild(func, createStripOriginalVisitor(context), context.transformer),
     ].reduce((func, f) => f(func), baseFuncExpression);
 
     const iife = ts.factory.createCallExpression(
