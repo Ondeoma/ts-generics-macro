@@ -10,14 +10,17 @@ import {
 } from "./expansion/typeExpansion";
 import { omitComments } from "./expansion/commentOmission";
 import { createStripOriginalVisitor } from "./expansion/originalStripping";
+import { validateMacroScope } from "./expansion/scopeValidation";
 
 export type MacroCallExpression = {
+  rootCall: ts.CallExpression;
   callExpression: ts.CallExpression;
   macroDefinition: MacroDefinition;
 };
 function extractMacroCallExpression(
   node: ts.Node,
   macroMap: MacroMap,
+  rootCall: ts.CallExpression | undefined,
   checker: ts.TypeChecker,
 ): MacroCallExpression | undefined {
   if (!isCallExpression(node)) {
@@ -32,6 +35,7 @@ function extractMacroCallExpression(
     return undefined;
   }
   return {
+    rootCall: rootCall ?? node,
     callExpression: node,
     macroDefinition,
   };
@@ -40,18 +44,21 @@ function extractMacroCallExpression(
 function createMacroExpansionVisitor(
   context: ContextBag,
   macroMap: MacroMap,
+  rootCall?: ts.CallExpression,
   parentTypeMap: TypeMap = new Map(),
 ): ts.Visitor {
   const visitor: ts.Visitor = (node: ts.Node) => {
     const macroCall = extractMacroCallExpression(
       node,
       macroMap,
+      rootCall,
       context.checker,
     );
     if (!macroCall) {
       return ts.visitEachChild(node, visitor, context.transformer);
     }
 
+    validateMacroScope(context, macroCall);
     const typeMap = extractTypeMap(context, macroCall, parentTypeMap);
 
     const modifiers = macroCall.macroDefinition.modifiers?.filter(
@@ -61,6 +68,7 @@ function createMacroExpansionVisitor(
     const reccurentVisitor = createMacroExpansionVisitor(
       context,
       macroMap,
+      macroCall.rootCall,
       typeMap,
     );
     const body = ts.visitEachChild(
