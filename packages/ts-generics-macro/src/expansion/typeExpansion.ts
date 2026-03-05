@@ -245,7 +245,8 @@ export function expandTypeArguments(
     throw "Failed to expand type arguments. Returned function body is not block. This is a bug of the transformer.";
   }
 
-  const newFunc = ts.factory.createFunctionExpression(
+  const newFunc = ts.factory.updateFunctionExpression(
+    func,
     func.modifiers,
     func.asteriskToken,
     func.name,
