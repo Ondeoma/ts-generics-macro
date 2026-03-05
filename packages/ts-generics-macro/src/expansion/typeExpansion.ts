@@ -2,10 +2,7 @@ import ts from "typescript";
 import { ContextBag } from "../common";
 import { getOriginalRootSymbol, isObjectType, isTypeReference } from "../utils";
 import { MacroCallExpression } from "../expansion";
-import {
-  createDiagnosticForMacroCall,
-  DiagnosticMessage,
-} from "../diagnosticMessages";
+import { createDiagnostic, DiagnosticMessage } from "../diagnosticMessages";
 
 export type TypeMap = Map<ts.Symbol, ts.TypeNode>;
 
@@ -51,9 +48,9 @@ export function extractTypeMap(
     return parentTypeMap;
   }
   if (typeArgs === undefined || typeParams.length != typeArgs.length) {
-    const diag = createDiagnosticForMacroCall(
+    const diag = createDiagnostic(
       macroCall.callExpression,
-      DiagnosticMessage.MacroCallTypeArgsMismatch,
+      DiagnosticMessage.MacroCallTypeArgsMismatch(),
     );
     context.extra.addDiagnostic(diag);
     return parentTypeMap;
@@ -63,9 +60,9 @@ export function extractTypeMap(
     .map((tParam) => getOriginalRootSymbol(tParam.name, context.checker))
     .filter((tParamSym) => !!tParamSym);
   if (typeParamSymbols.length < typeParams.length) {
-    const diag = createDiagnosticForMacroCall(
+    const diag = createDiagnostic(
       macroCall.callExpression,
-      DiagnosticMessage.MacroTypeParamWithNoSymbol,
+      DiagnosticMessage.MacroTypeParamWithNoSymbol(),
     );
     context.extra.addDiagnostic(diag);
     return parentTypeMap;

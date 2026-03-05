@@ -2,10 +2,7 @@ import ts from "typescript";
 import { ContextBag } from "../common";
 import { MacroCallExpression } from "../expansion";
 import { getRootSymbol, isNodeDescendant } from "../utils";
-import {
-  createDiagnosticForMacroCall,
-  DiagnosticMessage,
-} from "../diagnosticMessages";
+import { createDiagnostic, DiagnosticMessage } from "../diagnosticMessages";
 
 export function validateMacroScope(
   context: ContextBag,
@@ -17,9 +14,9 @@ export function validateMacroScope(
       isScopeReferenceIdentifier(node, macroCall.macroDefinition)
     ) {
       if (!isAccessible(context, node, macroCall)) {
-        const diag = createDiagnosticForMacroCall(
+        const diag = createDiagnostic(
           macroCall.rootCall,
-          DiagnosticMessage.InaccessibleIdentifier,
+          DiagnosticMessage.InaccessibleIdentifier(node),
         );
         context.extra.addDiagnostic(diag);
       }
@@ -38,9 +35,9 @@ function isAccessible(
 ): boolean {
   const symbolInDef = context.checker.getSymbolAtLocation(identifier);
   if (!symbolInDef) {
-    const diag = createDiagnosticForMacroCall(
+    const diag = createDiagnostic(
       macroCall.rootCall,
-      DiagnosticMessage.IdentifierWithNoSymbol,
+      DiagnosticMessage.IdentifierWithNoSymbol(identifier),
     );
     context.extra.addDiagnostic(diag);
     return true;

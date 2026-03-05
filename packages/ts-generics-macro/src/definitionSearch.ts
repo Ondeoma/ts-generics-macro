@@ -1,10 +1,7 @@
 import ts from "typescript";
 import type { TransformerExtras } from "ts-patch";
 
-import {
-  createDiagnosticForMacroDef,
-  DiagnosticMessage,
-} from "./diagnosticMessages";
+import { createDiagnostic, DiagnosticMessage } from "./diagnosticMessages";
 import { ContextBag, isMacroDefinition, MacroMap, Options } from "./common";
 import { getOriginalRootSymbol } from "./utils";
 
@@ -17,9 +14,9 @@ function createMacroDefinitionSearchVisitor(
       const symbol =
         node.name && getOriginalRootSymbol(node.name, context.checker);
       if (!symbol) {
-        const diag: ts.DiagnosticWithLocation = createDiagnosticForMacroDef(
+        const diag: ts.DiagnosticWithLocation = createDiagnostic(
           node,
-          DiagnosticMessage.MacroDefWithNoNameSymbol,
+          DiagnosticMessage.MacroDefWithNoNameSymbol(),
         );
         context.extra.addDiagnostic(diag);
       } else {
