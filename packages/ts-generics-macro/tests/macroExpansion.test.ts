@@ -8,9 +8,13 @@ import { macroExpansionTransformer, MacroExpansionOptions } from '../src/expansi
 import { MacroDefinition } from '../src/common';
 
 
-function matchExpansion(dir: string, expectedDir: string) {
-  const projectRoot = "../test-fixtures";
-  const program = createProgramForDirectory(projectRoot, dir);
+const projectRoot = "../test-fixtures";
+
+function transform(dir: string): {
+  diagnostics: readonly ts.Diagnostic[],
+  result: ts.TransformationResult<ts.SourceFile>,
+} {
+    const program = createProgramForDirectory(projectRoot, dir);
 
   const macroMap = new Map<ts.Symbol, MacroDefinition>();
   const searchOptions: MacroSearchOptions = {
@@ -31,14 +35,23 @@ function matchExpansion(dir: string, expectedDir: string) {
       .filter(file => !file.isDeclarationFile),
     factories,
     program.getCompilerOptions(),
-  )
+  );
+
+  return {
+    diagnostics: extra.diagnostics,
+    result: transformationResult,
+  }
+}
+
+function matchExpansion(dir: string, expectedDir: string) {
+  const {result: transformationResult, diagnostics} = transform(dir);
   const transformedSources = transformationResult.transformed
     .toSorted((a: ts.SourceFile, b: ts.SourceFile): number => a.fileName === b.fileName ? 0 : a.fileName < b.fileName ? -1 : +1);
 
   const expectedSources = createProgramForDirectory(projectRoot, expectedDir).getSourceFiles()
     .toSorted((a: ts.SourceFile, b: ts.SourceFile): number => a.fileName === b.fileName ? 0 : a.fileName < b.fileName ? -1 : +1);
 
-  printDiagnostics(extra.diagnostics)
+  printDiagnostics(diagnostics)
 
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,
@@ -52,9 +65,13 @@ function matchExpansion(dir: string, expectedDir: string) {
     .forEach(([transformed, expected]) => {
       expect(printer.printFile(transformed)).equals(printer.printFile(expected));
     });
-
 }
 
+function expectDiagnostics(dir: string, codes: number[]) {
+  const {diagnostics} = transform(dir);
+  const actualCodes = diagnostics.map(diag => diag.code);
+  expect(actualCodes).toEqual(expect.arrayContaining(codes));
+}
 
 describe("Macro expansion", () => {
   test("simple-macro", () => matchExpansion("simple-macro", "simple-macro-expected"));
@@ -62,4 +79,6 @@ describe("Macro expansion", () => {
   test("complex-typed-macro", () => matchExpansion("complex-typed-macro", "complex-typed-macro-expected"));
   test("inter-file-call", () => matchExpansion("inter-file-call", "inter-file-call-expected"));
   test("func-type-expansion", () => matchExpansion("func-type-expansion", "func-type-expansion-expected"));
+
+  test("inaccessible-identifier", () => expectDiagnostics("inaccessible-identifier", [24104]));
 });
