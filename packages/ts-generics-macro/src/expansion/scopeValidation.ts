@@ -17,6 +17,7 @@ export function validateMacroScope(
         const diag = createDiagnostic(
           macroCall.rootCall,
           DiagnosticMessage.InaccessibleIdentifier(node),
+          macroCall.stackTrace(),
         );
         context.extra.addDiagnostic(diag);
       }
@@ -38,6 +39,7 @@ function isAccessible(
     const diag = createDiagnostic(
       macroCall.rootCall,
       DiagnosticMessage.IdentifierWithNoSymbol(identifier),
+      macroCall.stackTrace(),
     );
     context.extra.addDiagnostic(diag);
     return true;

@@ -25,12 +25,22 @@ export function getSourceFileOfNode(
 export function createDiagnostic(
   node: ts.Node,
   message: DiagnosticMessage,
+  macroStack?: string[],
 ): ts.DiagnosticWithLocation {
+  const updatedMessage: DiagnosticMessage = macroStack
+    ? {
+      ...message,
+      messageText: `
+        ${message.messageText}
+        Macro stack trace: ${macroStack}
+      `
+    }
+    : message;
   return {
     file: getSourceFileOfNode(node),
     start: node.pos,
     length: node.end - node.pos,
-    ...message,
+    ...updatedMessage,
   };
 }
 

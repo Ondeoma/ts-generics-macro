@@ -51,6 +51,7 @@ export function extractTypeMap(
     const diag = createDiagnostic(
       macroCall.callExpression,
       DiagnosticMessage.MacroCallTypeArgsMismatch(),
+      macroCall.stackTrace(),
     );
     context.extra.addDiagnostic(diag);
     return parentTypeMap;
@@ -63,6 +64,7 @@ export function extractTypeMap(
     const diag = createDiagnostic(
       macroCall.callExpression,
       DiagnosticMessage.MacroTypeParamWithNoSymbol(),
+      macroCall.stackTrace(),
     );
     context.extra.addDiagnostic(diag);
     return parentTypeMap;

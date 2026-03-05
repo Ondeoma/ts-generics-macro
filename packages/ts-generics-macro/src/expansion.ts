@@ -12,15 +12,27 @@ import { omitComments } from "./expansion/commentOmission";
 import { createStripOriginalVisitor } from "./expansion/originalStripping";
 import { validateMacroScope } from "./expansion/scopeValidation";
 
-export type MacroCallExpression = {
-  rootCall: ts.CallExpression;
-  callExpression: ts.CallExpression;
-  macroDefinition: MacroDefinition;
+export class MacroCallExpression {
+  readonly rootCall: ts.CallExpression;
+  constructor(
+    public readonly callExpression: ts.CallExpression,
+    public readonly macroDefinition: MacroDefinition,
+    public readonly parent?: MacroCallExpression,
+  ) {
+    this.rootCall = parent?.rootCall ?? callExpression;
+  }
+  stackTrace(): string[] {
+    const str = this.macroDefinition.name?.text ?? "anonymous";
+    const parentStack = this.parent?.stackTrace() ?? [];
+    return parentStack.concat([str]);
+  }
 };
+
+
 function extractMacroCallExpression(
   node: ts.Node,
   macroMap: MacroMap,
-  rootCall: ts.CallExpression | undefined,
+  parentCall: MacroCallExpression | undefined,
   checker: ts.TypeChecker,
 ): MacroCallExpression | undefined {
   if (!isCallExpression(node)) {
@@ -34,24 +46,20 @@ function extractMacroCallExpression(
   if (!macroDefinition) {
     return undefined;
   }
-  return {
-    rootCall: rootCall ?? node,
-    callExpression: node,
-    macroDefinition,
-  };
+  return new MacroCallExpression(node, macroDefinition, parentCall);
 }
 
 function createMacroExpansionVisitor(
   context: ContextBag,
   macroMap: MacroMap,
-  rootCall?: ts.CallExpression,
+  parentCall?: MacroCallExpression,
   parentTypeMap: TypeMap = new Map(),
 ): ts.Visitor {
   const visitor: ts.Visitor = (node: ts.Node) => {
     const macroCall = extractMacroCallExpression(
       node,
       macroMap,
-      rootCall,
+      parentCall,
       context.checker,
     );
     if (!macroCall) {
@@ -68,7 +76,7 @@ function createMacroExpansionVisitor(
     const reccurentVisitor = createMacroExpansionVisitor(
       context,
       macroMap,
-      macroCall.rootCall,
+      macroCall,
       typeMap,
     );
     const body = ts.visitEachChild(
