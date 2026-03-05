@@ -3,9 +3,7 @@ import { ContextBag } from "../common";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Printer may fail on inter-file call if TextRange is not stripped.
-export function createStripOriginalVisitor(
-  context: ContextBag,
-): ts.Visitor {
+export function createStripOriginalVisitor(context: ContextBag): ts.Visitor {
   const visitor = (node: ts.Node) => {
     const visited: ts.Node = ts.visitEachChild(
       node,
@@ -22,5 +20,3 @@ export function createStripOriginalVisitor(
   };
   return visitor;
 }
-
-

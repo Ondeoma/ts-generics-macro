@@ -95,7 +95,11 @@ function createMacroExpansionVisitor(
       (func: ts.FunctionExpression) =>
         expandTypeArguments(context, func, typeMap),
       (func: ts.FunctionExpression) =>
-        ts.visitEachChild(func, createStripOriginalVisitor(context), context.transformer),
+        ts.visitEachChild(
+          func,
+          createStripOriginalVisitor(context),
+          context.transformer,
+        ),
     ].reduce((func, f) => f(func), baseFuncExpression);
 
     const iife = ts.factory.createCallExpression(

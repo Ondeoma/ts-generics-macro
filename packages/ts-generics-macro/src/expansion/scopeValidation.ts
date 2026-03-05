@@ -2,14 +2,20 @@ import ts from "typescript";
 import { ContextBag } from "../common";
 import { MacroCallExpression } from "../expansion";
 import { getRootSymbol, isNodeDescendant } from "../utils";
-import { createDiagnosticForMacroCall, DiagnosticMessage } from "../diagnosticMessages";
+import {
+  createDiagnosticForMacroCall,
+  DiagnosticMessage,
+} from "../diagnosticMessages";
 
 export function validateMacroScope(
   context: ContextBag,
   macroCall: MacroCallExpression,
 ) {
   const visitor = (node: ts.Node) => {
-    if (ts.isIdentifier(node) && isScopeReferenceIdentifier(node, macroCall.macroDefinition)) {
+    if (
+      ts.isIdentifier(node) &&
+      isScopeReferenceIdentifier(node, macroCall.macroDefinition)
+    ) {
       if (!isAccessible(context, node, macroCall)) {
         const diag = createDiagnosticForMacroCall(
           macroCall.rootCall,
@@ -25,20 +31,26 @@ export function validateMacroScope(
   ts.forEachChild(macroCall.macroDefinition, visitor);
 }
 
-function isAccessible(context: ContextBag, identifier: ts.Identifier, macroCall: MacroCallExpression): boolean {
+function isAccessible(
+  context: ContextBag,
+  identifier: ts.Identifier,
+  macroCall: MacroCallExpression,
+): boolean {
   const symbolInDef = context.checker.getSymbolAtLocation(identifier);
   if (!symbolInDef) {
     const diag = createDiagnosticForMacroCall(
       macroCall.rootCall,
       DiagnosticMessage.IdentifierWithNoSymbol,
-    )
+    );
     context.extra.addDiagnostic(diag);
     return true;
   }
   const rootSymbolInDef = getRootSymbol(symbolInDef, context.checker);
   const declarations = rootSymbolInDef.getDeclarations();
-  
-  const isInternal = declarations?.some(decl => isNodeDescendant(decl, macroCall.macroDefinition));
+
+  const isInternal = declarations?.some((decl) =>
+    isNodeDescendant(decl, macroCall.macroDefinition),
+  );
   if (isInternal) {
     return true;
   }
@@ -55,20 +67,27 @@ function isAccessible(context: ContextBag, identifier: ts.Identifier, macroCall:
     identifier.text,
     macroCall.rootCall,
     ts.SymbolFlags.Type | ts.SymbolFlags.Value | ts.SymbolFlags.Namespace,
-    false
+    false,
   );
-  if (resolvedSymbol && getRootSymbol(resolvedSymbol, context.checker) === rootSymbolInDef) {
+  if (
+    resolvedSymbol &&
+    getRootSymbol(resolvedSymbol, context.checker) === rootSymbolInDef
+  ) {
     return true;
   }
 
   return false;
 }
 
-function isScopeReferenceIdentifier(node: ts.Identifier, root: ts.Node): boolean {
+function isScopeReferenceIdentifier(
+  node: ts.Identifier,
+  root: ts.Node,
+): boolean {
   const parent = node.parent;
   if (parent === root) return true;
 
-  if (ts.isPropertyAccessExpression(parent) && parent.name === node) return false;
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node)
+    return false;
 
   if (ts.isQualifiedName(parent) && parent.right === node) return false;
 
@@ -84,4 +103,3 @@ function isScopeReferenceIdentifier(node: ts.Identifier, root: ts.Node): boolean
 
   return true;
 }
-

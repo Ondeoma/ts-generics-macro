@@ -195,7 +195,12 @@ function applyTypeMapOnObjectType(
       propSymbol,
       ts.getOriginalNode(callSite),
     );
-    const typeNode = applyTypeMapOnType(propType, context, parentTypeMap, callSite);
+    const typeNode = applyTypeMapOnType(
+      propType,
+      context,
+      parentTypeMap,
+      callSite,
+    );
 
     return ts.factory.createPropertySignature(
       undefined,

@@ -52,5 +52,5 @@ export function isNodeDescendant(node: ts.Node, ancestor: ts.Node): boolean {
   if (ts.isSourceFile(node)) {
     return false;
   }
-  return isNodeDescendant(node.parent, ancestor)
+  return isNodeDescendant(node.parent, ancestor);
 }
