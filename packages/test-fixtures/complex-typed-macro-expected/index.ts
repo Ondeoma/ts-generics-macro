@@ -1,3 +1,16 @@
+// macro definitions
+function m1$macro$<T1>(
+  arg: T1,
+) {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+
+function m2$macro$<T2>(
+  arg: T2,
+): T2[] {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+
 // macro use
 function genericFn<T>(arg: T) {
   (function (

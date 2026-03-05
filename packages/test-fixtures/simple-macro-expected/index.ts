@@ -10,6 +10,16 @@ const nonMacro$macro$ = () => {
   return false;
 }
 
+// These are macro.
+function true$macro$() {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+function add$macro$(
+  a: number,
+  b: number,
+): number {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
 
 // using macro.
 console.log(
