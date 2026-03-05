@@ -1,5 +1,4 @@
-import * as def from "./def";
-import { Wrapped, someNumber } from "./def";
+import { Wrapped, exportedType$macro$, hello$macro$, someNumber } from "./def";
 
-def.hello$macro$();
-def.exportedType$macro$();
+hello$macro$();
+exportedType$macro$();

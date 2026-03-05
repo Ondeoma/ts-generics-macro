@@ -1,3 +1,17 @@
+// macro definitions
+function array$macro$<T>(): T[] {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+function push$macro$<T extends Push<V>, V>(
+  arr: T,
+  value: V,
+): number {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+function nested$macro$<NT>(): NT[] {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+
 // macro call in generics function.
 // Note that type param T cannot be resolved at the time of macro expansion.
 function genericFn<FT>(): FT[] {

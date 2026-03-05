@@ -22,7 +22,29 @@ function createMacroDefinitionSearchVisitor(
       } else {
         result.set(symbol, node);
       }
-      return undefined;
+
+      const errorMessage =
+        "This is macro. Call of this function should have been expanded at compile time.";
+      const replacedBody = ts.factory.createBlock(
+        [
+          ts.factory.createThrowStatement(
+            ts.factory.createStringLiteral(errorMessage),
+          ),
+        ],
+        true,
+      );
+      const replacedDecl = ts.factory.updateFunctionDeclaration(
+        node,
+        node.modifiers,
+        node.asteriskToken,
+        node.name,
+        node.typeParameters,
+        node.parameters,
+        node.type,
+        replacedBody,
+      );
+
+      return replacedDecl;
     } else {
       return ts.visitEachChild(node, visitor, context.transformer);
     }
