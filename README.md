@@ -45,7 +45,16 @@ console.log(add$macro$(1, 2));
 
 **Transformed result:**
 ```typescript
-// using macro.
+// Define your macro function.
+// By default, functions ending with "$macro$" are treated as macros.
+function add$macro$(
+  a: number,
+  b: number,
+): number {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
+
+// Use the macro.
 console.log(
   (function (
     a: number,
