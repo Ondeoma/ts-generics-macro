@@ -1,5 +1,13 @@
 # @ondeoma/ts-generics-macro
 
+## 0.0.4
+
+### Patch Changes
+
+- 065e985: improved diagnostic messages
+- 0f1b405: add validation for scope of identifier
+- 486c53d: replace macro definition instead of removing
+
 ## 0.0.3
 
 ### Patch Changes
