@@ -26,8 +26,7 @@ export class MacroCallExpression {
     const parentStack = this.parent?.stackTrace() ?? [];
     return parentStack.concat([str]);
   }
-};
-
+}
 
 function extractMacroCallExpression(
   node: ts.Node,

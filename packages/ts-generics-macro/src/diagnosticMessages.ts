@@ -29,12 +29,12 @@ export function createDiagnostic(
 ): ts.DiagnosticWithLocation {
   const updatedMessage: DiagnosticMessage = macroStack
     ? {
-      ...message,
-      messageText: `
+        ...message,
+        messageText: `
         ${message.messageText}
         Macro stack trace: ${macroStack}
-      `
-    }
+      `,
+      }
     : message;
   return {
     file: getSourceFileOfNode(node),
