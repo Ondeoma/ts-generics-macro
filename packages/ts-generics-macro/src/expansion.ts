@@ -9,14 +9,18 @@ import {
   TypeMap,
 } from "./expansion/typeExpansion";
 import { omitComments } from "./expansion/commentOmission";
+import { createStripOriginalVisitor } from "./expansion/originalStripping";
+import { validateMacroScope } from "./expansion/scopeValidation";
 
 export type MacroCallExpression = {
+  rootCall: ts.CallExpression;
   callExpression: ts.CallExpression;
   macroDefinition: MacroDefinition;
 };
 function extractMacroCallExpression(
   node: ts.Node,
   macroMap: MacroMap,
+  rootCall: ts.CallExpression | undefined,
   checker: ts.TypeChecker,
 ): MacroCallExpression | undefined {
   if (!isCallExpression(node)) {
@@ -31,6 +35,7 @@ function extractMacroCallExpression(
     return undefined;
   }
   return {
+    rootCall: rootCall ?? node,
     callExpression: node,
     macroDefinition,
   };
@@ -39,18 +44,21 @@ function extractMacroCallExpression(
 function createMacroExpansionVisitor(
   context: ContextBag,
   macroMap: MacroMap,
+  rootCall?: ts.CallExpression,
   parentTypeMap: TypeMap = new Map(),
 ): ts.Visitor {
   const visitor: ts.Visitor = (node: ts.Node) => {
     const macroCall = extractMacroCallExpression(
       node,
       macroMap,
+      rootCall,
       context.checker,
     );
     if (!macroCall) {
       return ts.visitEachChild(node, visitor, context.transformer);
     }
 
+    validateMacroScope(context, macroCall);
     const typeMap = extractTypeMap(context, macroCall, parentTypeMap);
 
     const modifiers = macroCall.macroDefinition.modifiers?.filter(
@@ -60,6 +68,7 @@ function createMacroExpansionVisitor(
     const reccurentVisitor = createMacroExpansionVisitor(
       context,
       macroMap,
+      macroCall.rootCall,
       typeMap,
     );
     const body = ts.visitEachChild(
@@ -81,29 +90,16 @@ function createMacroExpansionVisitor(
       body,
     );
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    // Printer may fail on inter-file call if TextRange is not stripped.
-    const stripOriginalVisitor = (node: ts.Node) => {
-      const visited: ts.Node = ts.visitEachChild(
-        node,
-        stripOriginalVisitor,
-        context.transformer,
-      );
-      const stripped = ts.setTextRange(visited, undefined);
-      // Force strip
-      (stripped as any).pos = -1;
-      (stripped as any).end = -1;
-      if (-1 < stripped.pos || -1 < stripped.end)
-        throw `Failed to strip text range: (${stripped.pos}, ${stripped.end})`;
-      return stripped;
-    };
-
     const funcExpression = [
       (func: ts.FunctionExpression) => omitComments(context, func),
       (func: ts.FunctionExpression) =>
         expandTypeArguments(context, func, typeMap),
       (func: ts.FunctionExpression) =>
-        ts.visitEachChild(func, stripOriginalVisitor, context.transformer),
+        ts.visitEachChild(
+          func,
+          createStripOriginalVisitor(context),
+          context.transformer,
+        ),
     ].reduce((func, f) => f(func), baseFuncExpression);
 
     const iife = ts.factory.createCallExpression(

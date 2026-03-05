@@ -1,7 +1,3 @@
-export function hello$macro$(): string {
-  return "hello!"
-}
-
 export interface Wrapped<T> {
   value: T;
 }

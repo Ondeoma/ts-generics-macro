@@ -44,3 +44,13 @@ export type RecursivePartial<T> = {
       ? RecursivePartial<T[P]>
       : T[P];
 };
+
+export function isNodeDescendant(node: ts.Node, ancestor: ts.Node): boolean {
+  if (node === ancestor) {
+    return true;
+  }
+  if (ts.isSourceFile(node)) {
+    return false;
+  }
+  return isNodeDescendant(node.parent, ancestor);
+}
