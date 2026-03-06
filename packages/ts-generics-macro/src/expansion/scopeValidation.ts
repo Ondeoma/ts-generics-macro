@@ -1,19 +1,19 @@
 import ts from "typescript";
-import { ContextBag } from "../common";
-import { MacroCallExpression } from "../expansion";
+import { ContextBag, MacroCallExpression, MacroMap } from "../common";
 import { getRootSymbol, isNodeDescendant } from "../utils";
 import { createDiagnostic, DiagnosticMessage } from "../diagnosticMessages";
 
 export function validateMacroScope(
   context: ContextBag,
   macroCall: MacroCallExpression,
+  macroMap: MacroMap,
 ) {
   const visitor = (node: ts.Node) => {
     if (
       ts.isIdentifier(node) &&
       isScopeReferenceIdentifier(node, macroCall.macroDefinition)
     ) {
-      if (!isAccessible(context, node, macroCall)) {
+      if (!isAccessible(context, node, macroCall, macroMap)) {
         const diag = createDiagnostic(
           macroCall.rootCall,
           DiagnosticMessage.InaccessibleIdentifier(node),
@@ -33,6 +33,7 @@ function isAccessible(
   context: ContextBag,
   identifier: ts.Identifier,
   macroCall: MacroCallExpression,
+  macroMap: MacroMap,
 ): boolean {
   const symbolInDef = context.checker.getSymbolAtLocation(identifier);
   if (!symbolInDef) {
@@ -45,6 +46,12 @@ function isAccessible(
     return true;
   }
   const rootSymbolInDef = getRootSymbol(symbolInDef, context.checker);
+
+  // Macros will be expanded and its identifier will not accessed.
+  if (macroMap.has(rootSymbolInDef)) {
+    return true;
+  }
+
   const declarations = rootSymbolInDef.getDeclarations();
 
   const isInternal = declarations?.some((decl) =>

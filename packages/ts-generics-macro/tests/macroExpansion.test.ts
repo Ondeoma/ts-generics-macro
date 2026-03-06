@@ -52,6 +52,8 @@ function matchExpansion(dir: string, expectedDir: string) {
     .toSorted((a: ts.SourceFile, b: ts.SourceFile): number => a.fileName === b.fileName ? 0 : a.fileName < b.fileName ? -1 : +1);
 
   printDiagnostics(diagnostics)
+  const errors = diagnostics.filter(diag => diag.category === ts.DiagnosticCategory.Error);
+  expect(errors.length).toBe(0);
 
   const printer = ts.createPrinter({
     newLine: ts.NewLineKind.LineFeed,

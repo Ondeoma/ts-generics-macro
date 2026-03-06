@@ -5,6 +5,8 @@ import { Wrapped, exportedType$macro$, hello$macro$, someNumber } from "./def";
 })();
 (function (): Wrapped<number> {
   return {
-    value: someNumber,
+    value: (function (): number {
+      return someNumber;
+    })(),
   };
 })();
