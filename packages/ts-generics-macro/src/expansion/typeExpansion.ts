@@ -1,7 +1,6 @@
 import ts from "typescript";
-import { ContextBag } from "../common";
+import { ContextBag, MacroCallExpression } from "../common";
 import { getOriginalRootSymbol, isObjectType, isTypeReference } from "../utils";
-import { MacroCallExpression } from "../expansion";
 import { createDiagnostic, DiagnosticMessage } from "../diagnosticMessages";
 
 export type TypeMap = Map<ts.Symbol, ts.TypeNode>;
