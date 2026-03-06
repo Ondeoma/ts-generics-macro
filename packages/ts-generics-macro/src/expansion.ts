@@ -49,7 +49,7 @@ function createMacroExpansionVisitor(
       return ts.visitEachChild(node, visitor, context.transformer);
     }
 
-    validateMacroScope(context, macroCall);
+    validateMacroScope(context, macroCall, macroMap);
     const typeMap = extractTypeMap(context, macroCall, parentTypeMap);
 
     const modifiers = macroCall.macroDefinition.modifiers?.filter(
