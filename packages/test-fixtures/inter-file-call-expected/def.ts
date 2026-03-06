@@ -9,3 +9,6 @@ export const someNumber = 42;
 export function exportedType$macro$(): Wrapped<number> {
   throw "This is macro. Call of this function should have been expanded at compile time.";
 }
+function private$macro$(): number {
+  throw "This is macro. Call of this function should have been expanded at compile time.";
+}
