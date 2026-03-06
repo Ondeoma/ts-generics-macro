@@ -9,7 +9,7 @@ export const someNumber = 42;
 export function exportedType$macro$(): Wrapped<number> {
   return {
     value: private$macro$(),
-  };
+  } as const;
 }
 function private$macro$(): number {
   return someNumber;

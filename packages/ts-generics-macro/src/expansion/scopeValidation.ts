@@ -107,5 +107,15 @@ function isScopeReferenceIdentifier(
 
   if (ts.isEnumMember(parent) && parent.name === node) return false;
 
+  if (ts.isTypeReferenceNode(parent) && node.text === "const") return false;
+
+  if (ts.isLabeledStatement(parent) && parent.label === node) return false;
+  if (ts.isBreakStatement(parent) && parent.label === node) return false;
+  if (ts.isContinueStatement(parent) && parent.label === node) return false;
+
+  if (ts.isMetaProperty(parent) && parent.name === node) return false;
+  
+  if (ts.isJsxAttribute(parent) && parent.name === node) return false;
+
   return true;
 }
