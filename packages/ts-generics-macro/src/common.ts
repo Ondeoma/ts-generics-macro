@@ -37,3 +37,19 @@ export function isMacroDefinition(
     !node.modifiers?.some((mod) => mod.kind === ts.SyntaxKind.DeclareKeyword)
   );
 }
+
+export class MacroCallExpression {
+  readonly rootCall: ts.CallExpression;
+  constructor(
+    public readonly callExpression: ts.CallExpression,
+    public readonly macroDefinition: MacroDefinition,
+    public readonly parent?: MacroCallExpression,
+  ) {
+    this.rootCall = parent?.rootCall ?? callExpression;
+  }
+  stackTrace(): string[] {
+    const str = this.macroDefinition.name?.text ?? "anonymous";
+    const parentStack = this.parent?.stackTrace() ?? [];
+    return parentStack.concat([str]);
+  }
+}

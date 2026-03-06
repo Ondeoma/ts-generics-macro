@@ -1,6 +1,5 @@
 import ts from "typescript";
-import { ContextBag } from "../common";
-import { MacroCallExpression } from "../expansion";
+import { ContextBag, MacroCallExpression } from "../common";
 import { getRootSymbol, isNodeDescendant } from "../utils";
 import { createDiagnostic, DiagnosticMessage } from "../diagnosticMessages";
 

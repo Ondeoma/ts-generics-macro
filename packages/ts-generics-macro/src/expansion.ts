@@ -1,7 +1,7 @@
 import ts, { isCallExpression } from "typescript";
 import type { TransformerExtras } from "ts-patch";
 
-import { ContextBag, MacroDefinition, MacroMap, Options } from "./common";
+import { ContextBag, MacroCallExpression, MacroMap, Options } from "./common";
 import { getOriginalRootSymbol } from "./utils";
 import {
   expandTypeArguments,
@@ -11,22 +11,6 @@ import {
 import { omitComments } from "./expansion/commentOmission";
 import { createStripOriginalVisitor } from "./expansion/originalStripping";
 import { validateMacroScope } from "./expansion/scopeValidation";
-
-export class MacroCallExpression {
-  readonly rootCall: ts.CallExpression;
-  constructor(
-    public readonly callExpression: ts.CallExpression,
-    public readonly macroDefinition: MacroDefinition,
-    public readonly parent?: MacroCallExpression,
-  ) {
-    this.rootCall = parent?.rootCall ?? callExpression;
-  }
-  stackTrace(): string[] {
-    const str = this.macroDefinition.name?.text ?? "anonymous";
-    const parentStack = this.parent?.stackTrace() ?? [];
-    return parentStack.concat([str]);
-  }
-}
 
 function extractMacroCallExpression(
   node: ts.Node,
