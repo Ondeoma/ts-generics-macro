@@ -8,5 +8,5 @@ import { Wrapped, exportedType$macro$, hello$macro$, someNumber } from "./def";
     value: (function (): number {
       return someNumber;
     })(),
-  };
+  } as const;
 })();

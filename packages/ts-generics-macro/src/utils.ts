@@ -54,3 +54,22 @@ export function isNodeDescendant(node: ts.Node, ancestor: ts.Node): boolean {
   }
   return isNodeDescendant(node.parent, ancestor);
 }
+
+// Almost generalized ts.findAncestor
+export function findFirstAncestor(
+  node: ts.Node,
+  predicate: (current: ts.Node) => boolean,
+  stopCondition: (current: ts.Node) => boolean = (current) =>
+    ts.isSourceFile(current),
+): ts.Node | undefined {
+  let current: ts.Node | undefined = node.parent;
+
+  while (current && !stopCondition(current)) {
+    if (predicate(current)) {
+      return current;
+    }
+    current = current.parent;
+  }
+
+  return undefined;
+}
