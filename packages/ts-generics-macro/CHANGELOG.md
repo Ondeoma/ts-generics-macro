@@ -1,5 +1,11 @@
 # @ondeoma/ts-generics-macro
 
+## 0.0.6
+
+### Patch Changes
+
+- 49ba9b3: fix scope validation for some cases
+
 ## 0.0.5
 
 ### Patch Changes
