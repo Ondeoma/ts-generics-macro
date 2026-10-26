@@ -35,6 +35,6 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "ts-patch": "^4.0.1",
-    "vitest": "^4.0.16"
+    "vitest": "^5.0.5"
   }
 }
