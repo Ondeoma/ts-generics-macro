@@ -33,7 +33,7 @@
     "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^26.6.5",
     "ts-patch": "^4.0.1",
     "vitest": "^4.0.16"
   }
