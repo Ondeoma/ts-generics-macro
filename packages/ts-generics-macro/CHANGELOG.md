@@ -1,5 +1,11 @@
 # @ondeoma/ts-generics-macro
 
+## 0.1.0
+
+### Minor Changes
+
+- 338a672: update dependencies
+
 ## 0.0.6
 
 ### Patch Changes
